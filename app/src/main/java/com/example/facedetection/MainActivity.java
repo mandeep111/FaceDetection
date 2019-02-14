@@ -10,6 +10,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
+import android.media.Image;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Parcelable;
@@ -42,6 +43,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
     private ProgressDialog detectionProgressDialog;
     private static int PICK_IMAGE = 101;
+    private static int CAMERA_IMAGE = 102;
     private final String apiEndpoint = "https://westcentralus.api.cognitive.microsoft.com/face/v1.0";
     private final String subscriptionKey = "b48bf5631f8e4cad9e27ebdec9b2e11b";
 
@@ -60,10 +62,6 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
 
         imageBtn.setOnClickListener(this);
 
-//        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.photo);
-//        imageBtn.setImageBitmap(bitmap);
-//        detectAndFrame(bitmap);
-
     }
 
     @Override
@@ -73,6 +71,25 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         }
 
     }
+
+//    private void captureImage() {
+//        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+//        if (intent.resolveActivity(getPackageManager()) != null) {
+//            startActivityForResult(intent, CAMERA_IMAGE);
+//        }
+//    }
+//
+//    @Override
+//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+//        if (requestCode == CAMERA_IMAGE && resultCode == RESULT_OK) {
+//            ImageView imageView = findViewById(R.id.imageView1);
+//            Bundle extras = data.getExtras();
+//            Bitmap imageBitmap = (Bitmap) extras.get("data");
+//            imageView.setImageBitmap(imageBitmap);
+//            detectAndFrame(imageBitmap);
+//        }
+//    }
+
 
     private void captureImage() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
@@ -192,7 +209,7 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         paint.setAntiAlias(true);
         paint.setStyle(Paint.Style.STROKE);
         paint.setColor(Color.RED);
-        paint.setStrokeWidth(10);
+        paint.setStrokeWidth(3);
         if (faces != null) {
             for (Face face : faces) {
                 FaceRectangle faceRectangle = face.faceRectangle;
