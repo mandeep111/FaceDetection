@@ -55,10 +55,12 @@ public class CustomAdapter extends BaseAdapter {
 
             textAge.setText("Age: " + face[position].faceAttributes.age);
             textGender.setText("Gender: " + face[position].faceAttributes.gender);
+
             Bitmap bitmap = (Bitmap) ImageHelper.generateThumbnail(originalBitmap, face[position].faceRectangle);
             userImage.setImageBitmap(bitmap);
 
-
+//            userImage.setImageBitmap(
+//                    MainActivity.drawFaceRectanglesOnBitmap(originalBitmap, face));
         }
         return view;
     }

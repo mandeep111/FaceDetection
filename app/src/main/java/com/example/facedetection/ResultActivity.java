@@ -22,12 +22,17 @@ public class ResultActivity extends AppCompatActivity {
         setContentView(R.layout.activity_result);
 
         String data = getIntent().getStringExtra("list_faces");
-        ImageView imageView = findViewById(R.id.imageView1);
-//        Bitmap originalBitmap=((BitmapDrawable)imageView.getDrawable()).getBitmap();
+//        String image = getIntent().getStringExtra("image");
+
+        Bitmap originalBitmap;
+
+        byte[] byteArray = getIntent().getByteArrayExtra("image");
+        originalBitmap = BitmapFactory.decodeByteArray(byteArray, 0, byteArray.length);
 
         Gson gson = new Gson();
         Face[] faces = gson.fromJson(data, Face[].class);
-        Bitmap originalBitmap =  BitmapFactory.decodeResource(getResources(), R.drawable.photo);
+
+
         ListView myListView = findViewById(R.id.list_view);
 
         CustomAdapter customAdapter = new CustomAdapter(faces, this, originalBitmap);

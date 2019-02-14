@@ -9,6 +9,7 @@ import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.Parcelable;
@@ -17,6 +18,7 @@ import android.support.annotation.Nullable;
 import android.support.v7.app.AlertDialog;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.util.Base64;
 import android.view.View;
 import android.widget.Button;
 import android.widget.ImageView;
@@ -32,9 +34,9 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import static com.example.facedetection.R.drawable.photo;
 
-public class MainActivity extends AppCompatActivity {
+
+public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private ImageView imageBtn;
 
 
@@ -56,48 +58,50 @@ public class MainActivity extends AppCompatActivity {
 
         detectionProgressDialog = new ProgressDialog(this);
 
-//        imageBtn.setOnClickListener(this);
+        imageBtn.setOnClickListener(this);
 
-        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.photo);
-        imageBtn.setImageBitmap(bitmap);
-        detectAndFrame(bitmap);
+//        Bitmap bitmap = BitmapFactory.decodeResource(getResources(), R.drawable.photo);
+//        imageBtn.setImageBitmap(bitmap);
+//        detectAndFrame(bitmap);
 
     }
 
-//    @Override
-//    public void onClick(View v) {
-//        if (v == imageBtn) {
-//            captureImage();
-//        }
-//
-//    }
-//
-//    private void captureImage() {
-//        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
-//        intent.setType("image/*");
-//        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE);
-//
-//    }
-//    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-//        super.onActivityResult(requestCode, resultCode, data);
-//
-//        if (requestCode == PICK_IMAGE && resultCode == RESULT_OK && data!= null && data.getData() != null) {
-//            Uri uri = data.getData();
-//
-//            try {
-//                Bitmap bitmap= MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
-//                ImageView imageView = findViewById(R.id.imageView1);
-//                imageView.setImageBitmap(bitmap);
-//                detectAndFrame(bitmap);
-//            } catch (IOException e) {
-//                e.printStackTrace();
-//            }
-//        }
-//    }
+    @Override
+    public void onClick(View v) {
+        if (v == imageBtn) {
+            captureImage();
+        }
+
+    }
+
+    private void captureImage() {
+        Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
+        intent.setType("image/*");
+        startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE);
+
+    }
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        if (requestCode == PICK_IMAGE && resultCode == RESULT_OK && data!= null && data.getData() != null) {
+            Uri uri = data.getData();
+
+            try {
+                Bitmap bitmap= MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                ImageView imageView = findViewById(R.id.imageView1);
+                imageView.setImageBitmap(bitmap);
+                detectAndFrame(bitmap);
+
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        }
+    }
     private void detectAndFrame(final Bitmap imageBitmap) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
+        final byte[] byteArray = outputStream.toByteArray();
         final ByteArrayInputStream inputStream =
                 new ByteArrayInputStream(outputStream.toByteArray());
         AsyncTask<InputStream, String, Face[]> detectTask =
@@ -151,16 +155,20 @@ public class MainActivity extends AppCompatActivity {
                             showError(exceptionMessage);
                         }
                         if (result == null) return;
-//                        ImageView imageView = findViewById(R.id.imageView1);
-//                        imageView.setImageBitmap(
-//                                drawFaceRectanglesOnBitmap(imageBitmap, result));
-//                        imageBitmap.recycle();
+                        ImageView imageView = findViewById(R.id.imageView1);
+                        imageView.setImageBitmap(
+                                drawFaceRectanglesOnBitmap(imageBitmap, result));
+                        imageBitmap.recycle();
+
 
                         Intent intent = new Intent(getApplicationContext(), ResultActivity.class);
+
                         Gson gson = new Gson();
                         String data = gson.toJson(result);
+
                         intent.putExtra("list_faces", data);
-//                        intent.putExtra("image", (Parcelable) imageView);
+                        intent.putExtra("image", byteArray);
+
                         startActivity(intent);
                     }
 
@@ -177,8 +185,7 @@ public class MainActivity extends AppCompatActivity {
                 .create().show();
     }
 
-    private static Bitmap drawFaceRectanglesOnBitmap(
-            Bitmap originalBitmap, Face[] faces) {
+    public static Bitmap drawFaceRectanglesOnBitmap(Bitmap originalBitmap, Face[] faces) {
         Bitmap bitmap = originalBitmap.copy(Bitmap.Config.ARGB_8888, true);
         Canvas canvas = new Canvas(bitmap);
         Paint paint = new Paint();
