@@ -11,7 +11,14 @@
         android:layout_height="fill_parent"
         android:id="@+id/imageView1"
         android:src="@drawable/profile"
-
+        android:layout_above="@+id/button"
         android:contentDescription="Image with faces to analyze"/>
+
+    <Button
+        android:id="@+id/button"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="Open Gallary"
+        android:layout_alignParentBottom="true"/>
 
 </RelativeLayout>

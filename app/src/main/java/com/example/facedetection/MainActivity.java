@@ -39,13 +39,13 @@ import java.io.InputStream;
 
 public class MainActivity extends AppCompatActivity implements View.OnClickListener {
     private ImageView imageBtn;
-
+    private Button button;
 
     private ProgressDialog detectionProgressDialog;
-    private static int PICK_IMAGE = 101;
-    private static int CAMERA_IMAGE = 102;
+    private static final int PICK_IMAGE = 101;
+    private static final int CAMERA_IMAGE = 102;
     private final String apiEndpoint = "https://westcentralus.api.cognitive.microsoft.com/face/v1.0";
-    private final String subscriptionKey = "b48bf5631f8e4cad9e27ebdec9b2e11b";
+    private final String subscriptionKey = "dc88f893fb644c1b9773a35bb9281378";
 
     private final FaceServiceClient faceServiceClient =
             new FaceServiceRestClient(apiEndpoint, subscriptionKey);
@@ -57,10 +57,12 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
         setContentView(R.layout.activity_main);
 
         imageBtn = findViewById(R.id.imageView1);
+        button = findViewById(R.id.button);
 
         detectionProgressDialog = new ProgressDialog(this);
 
         imageBtn.setOnClickListener(this);
+        button.setOnClickListener(this);
 
     }
 
@@ -68,53 +70,62 @@ public class MainActivity extends AppCompatActivity implements View.OnClickListe
     public void onClick(View v) {
         if (v == imageBtn) {
             captureImage();
+//            button.setVisibility(View.INVISIBLE);
+        }
+
+        if (v == button) {
+            getImage();
         }
 
     }
 
-//    private void captureImage() {
-//        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
-//        if (intent.resolveActivity(getPackageManager()) != null) {
-//            startActivityForResult(intent, CAMERA_IMAGE);
-//        }
-//    }
-//
-//    @Override
-//    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
-//        if (requestCode == CAMERA_IMAGE && resultCode == RESULT_OK) {
-//            ImageView imageView = findViewById(R.id.imageView1);
-//            Bundle extras = data.getExtras();
-//            Bitmap imageBitmap = (Bitmap) extras.get("data");
-//            imageView.setImageBitmap(imageBitmap);
-//            detectAndFrame(imageBitmap);
-//        }
-//    }
-
-
     private void captureImage() {
+        Intent intent = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
+        if (intent.resolveActivity(getPackageManager()) != null) {
+            startActivityForResult(intent, CAMERA_IMAGE);
+        }
+    }
+    private void getImage() {
         Intent intent = new Intent(Intent.ACTION_GET_CONTENT);
         intent.setType("image/*");
         startActivityForResult(Intent.createChooser(intent, "Select Picture"), PICK_IMAGE);
 
     }
+
     @Override
-    protected void onActivityResult(int requestCode, int resultCode, @Nullable Intent data) {
-        super.onActivityResult(requestCode, resultCode, data);
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
 
-        if (requestCode == PICK_IMAGE && resultCode == RESULT_OK && data!= null && data.getData() != null) {
-            Uri uri = data.getData();
+        switch (requestCode) {
+            case PICK_IMAGE:
+                if (requestCode == PICK_IMAGE && resultCode == RESULT_OK && data!= null && data.getData() != null) {
+                    Uri uri = data.getData();
 
-            try {
-                Bitmap bitmap= MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
-                ImageView imageView = findViewById(R.id.imageView1);
-                imageView.setImageBitmap(bitmap);
-                detectAndFrame(bitmap);
+                    try {
+                        Bitmap bitmap= MediaStore.Images.Media.getBitmap(getContentResolver(), uri);
+                        ImageView imageView = findViewById(R.id.imageView1);
+                        imageView.setImageBitmap(bitmap);
+                        detectAndFrame(bitmap);
 
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+                }
+                break;
+
+            case CAMERA_IMAGE:
+                if (requestCode == CAMERA_IMAGE && resultCode == RESULT_OK) {
+                    ImageView imageView = findViewById(R.id.imageView1);
+                    Bundle extras = data.getExtras();
+                    Bitmap imageBitmap = (Bitmap) extras.get("data");
+                    imageView.setImageBitmap(imageBitmap);
+                    detectAndFrame(imageBitmap);
+                }
+                break;
         }
+
     }
+
+
     private void detectAndFrame(final Bitmap imageBitmap) {
         ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
         imageBitmap.compress(Bitmap.CompressFormat.JPEG, 100, outputStream);
